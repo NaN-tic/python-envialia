@@ -10,11 +10,11 @@ print "Envialia services"
 services = services()
 print services
 
-with API(agency, customer, password, debug) as envialia_api:
+with API(agency, customer, password, debug=debug) as envialia_api:
     print "Test connection"
     print envialia_api.test_connection()
 
-with Picking(agency, customer, password, debug) as picking_api:
+with Picking(agency, customer, password, debug=debug) as picking_api:
     date = None  # date YYYY/MM/DD
     print "List all deliveries"
     print picking_api.list(date)
@@ -23,7 +23,7 @@ with Picking(agency, customer, password, debug) as picking_api:
     data['agency_cargo'] = agency
     data['agency_origin'] = agency
     # data['reference'] = ''  # envialia use numbers in reference
-    # data['picking_date'] = '2012/11/05' # not date, today
+    # data['picking_date'] = '2012/11/05' # not date, it's today
     # data['agency_dest'] = ''
     data['service_code'] = 10
     data['company_code'] = 'Zikzakmedia'

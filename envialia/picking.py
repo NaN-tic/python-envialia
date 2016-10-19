@@ -33,6 +33,9 @@ class Picking(API):
         envxml = ENVXML()
         data = envxml.envialia_xml_picking_list(self.session, date)
         data = self.connect(data)
+        if not data:
+            return deliveries
+
         dom = parseString(data)
         info = dom.getElementsByTagName('v1:strInfEnvios')
         if info[0].firstChild:
@@ -62,6 +65,9 @@ class Picking(API):
         envxml = ENVXML()
         data = envxml.envialia_xml_picking_info(self.session, reference, data)
         data = self.connect(data)
+        if not data:
+            return delivery
+
         dom = parseString(data)
         info = dom.getElementsByTagName('v1:strEnvio')
         if info[0].firstChild:
@@ -89,6 +95,9 @@ class Picking(API):
         envxml = ENVXML()
         data = envxml.envialia_xml_picking_create(self.session, data)
         data = self.connect(data)
+        if not data:
+            return delivery
+
         dom = parseString(data)
         # Get error
         try:
@@ -119,6 +128,9 @@ class Picking(API):
         envxml = ENVXML()
         data = envxml.envialia_xml_picking_delete(self.session, reference, data)
         data = self.connect(data)
+        if not data:
+            return False
+
         dom = parseString(data)
         error = dom.getElementsByTagName('v1:intCodError')
         if error[0].firstChild:
@@ -139,11 +151,13 @@ class Picking(API):
         envxml = ENVXML()
         data = envxml.envialia_xml_picking_state(self.session, reference, data)
         data = self.connect(data)
+        if not data:
+            return
 
         dom = parseString(data)
         state = dom.getElementsByTagName('v1:strEnvEstados')
         if not state[0].firstChild:
-            return None
+            return
 
         if not get_list:
             return state[0].firstChild.data
@@ -175,6 +189,9 @@ class Picking(API):
         envxml = ENVXML()
         data = envxml.envialia_xml_picking_label(self.session, reference, data)
         data = self.connect(data)
+        if not data:
+            return False
+
         dom = parseString(data)
         label = dom.getElementsByTagName('v1:strEtiqueta')
         if not label:

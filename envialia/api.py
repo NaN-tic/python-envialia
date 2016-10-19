@@ -1,11 +1,10 @@
 #This file is part of envialia. The COPYRIGHT file at the top level of
 #this repository contains the full copyright notices and license terms.
-
 from envialia.utils import envialia_url
 from envialia.envxml import ENVXML
-
 from xml.dom.minidom import parseString
 import urllib2
+import socket
 
 
 class API(object):
@@ -17,11 +16,12 @@ class API(object):
         'agency',
         'customer',
         'password',
+        'timeout',
         'session',
         'error',
     )
 
-    def __init__(self, agency, customer, password, debug=False):
+    def __init__(self, agency, customer, password, timeout=None, debug=False):
         """
         This is the Base API class which other APIs have to subclass. By
         default the inherited classes also get the properties of this
@@ -37,11 +37,13 @@ class API(object):
         :param agency: API agency of the Envialia Web Services.
         :param customer: API customer of the Envialia Web Services.
         :param password: API password of the Envialia Web Services.
+        :param timeout: int number of seconds to lost connection.
         """
         self.url = envialia_url(debug)
         self.agency = agency
         self.customer = customer
         self.password = password
+        self.timeout = timeout
         self.session = None
         self.error = False
 
@@ -52,7 +54,8 @@ class API(object):
         envxml = ENVXML()
         data = envxml.envialia_xml_login(self.agency, self.customer, self.password)
         session = self.get_session(data)
-        self.session = session
+        if session:
+            self.session = session
         return self
 
     def __exit__(self, type, value, traceback):
@@ -67,9 +70,13 @@ class API(object):
 
         :param data: XML data.
         """
-        result = urllib2.urlopen(self.url, data)
-        data = result.read()
-        return data
+        try:
+            response = urllib2.urlopen(self.url, data, timeout=self.timeout)
+            return response.read()
+        except socket.timeout as err:
+            return
+        except socket.error as err:
+            return
 
     def get_session(self, data):
         """
@@ -83,6 +90,9 @@ class API(object):
         faultstring = False
 
         data = self.connect(data)
+        if not data:
+            return
+
         try:
             dom = parseString(data)
             faultstring = dom.getElementsByTagName('faultstring')
